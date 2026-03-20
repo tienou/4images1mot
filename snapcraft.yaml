@@ -1,0 +1,47 @@
+name: 4images1mot
+version: '1.0.0'
+summary: 4 Images 1 Mot - Jeu de devinettes
+description: |
+  Trouve le mot commun aux 4 images !
+  Un jeu de réflexion amusant inspiré du célèbre jeu mobile.
+  30 niveaux de difficulté croissante.
+
+grade: stable
+confinement: strict
+base: core22
+
+architectures:
+  - build-on: amd64
+
+apps:
+  4images1mot:
+    command: bin/launch.sh
+    extensions: [gnome]
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+
+parts:
+  4images1mot:
+    plugin: dump
+    source: .
+    stage-packages:
+      - python3
+      - python3-tk
+    override-build: |
+      craftctl default
+      mkdir -p $CRAFT_PART_INSTALL/opt/4images1mot
+      cp main.py $CRAFT_PART_INSTALL/opt/4images1mot/
+      cp puzzles.py $CRAFT_PART_INSTALL/opt/4images1mot/
+      cp icon.svg $CRAFT_PART_INSTALL/opt/4images1mot/
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cat > $CRAFT_PART_INSTALL/bin/launch.sh << 'EOF'
+#!/bin/bash
+exec python3 /opt/4images1mot/main.py "$@"
+EOF
+      chmod +x $CRAFT_PART_INSTALL/bin/launch.sh
+      mkdir -p $CRAFT_PART_INSTALL/meta/gui
+      cp 4images1mot.desktop $CRAFT_PART_INSTALL/meta/gui/
+      cp icon.svg $CRAFT_PART_INSTALL/meta/gui/4images1mot.svg

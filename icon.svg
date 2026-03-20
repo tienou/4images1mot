@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E"/>
+      <stop offset="100%" style="stop-color:#0F3460"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+  <!-- 4 image cards -->
+  <rect x="40" y="40" width="200" height="160" rx="15" fill="#FF6B35"/>
+  <rect x="272" y="40" width="200" height="160" rx="15" fill="#06D6A0"/>
+  <rect x="40" y="232" width="200" height="160" rx="15" fill="#E94560"/>
+  <rect x="272" y="232" width="200" height="160" rx="15" fill="#FFD166"/>
+  <!-- Icons in cards -->
+  <text x="140" y="140" font-size="72" text-anchor="middle" fill="white">☀️</text>
+  <text x="372" y="140" font-size="72" text-anchor="middle" fill="white">🌊</text>
+  <text x="140" y="332" font-size="72" text-anchor="middle" fill="white">🎵</text>
+  <text x="372" y="332" font-size="72" text-anchor="middle" fill="white">🌳</text>
+  <!-- Question mark -->
+  <circle cx="256" cy="216" r="40" fill="#E94560"/>
+  <text x="256" y="232" font-size="48" font-weight="bold" text-anchor="middle" fill="white" font-family="Ubuntu,sans-serif">?</text>
+  <!-- Bottom text bar -->
+  <rect x="80" y="420" width="352" height="60" rx="12" fill="#2A4A7F"/>
+  <text x="256" y="462" font-size="30" font-weight="bold" text-anchor="middle" fill="white" font-family="Ubuntu,sans-serif">_ _ _ _</text>
+</svg>
