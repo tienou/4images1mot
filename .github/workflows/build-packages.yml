@@ -88,19 +88,20 @@ jobs:
           (Get-Content installer.iss) -replace '__VERSION__', $version | Set-Content installer.iss
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
 
-      - name: Rename portable exe with version
+      - name: Collect Windows artifacts
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
-          Copy-Item "dist\4images1mot.exe" "dist\4images1mot-${version}-portable.exe"
+          New-Item -ItemType Directory -Force -Path artifacts
+          Copy-Item "dist\4images1mot.exe" "artifacts\4images1mot-${version}-portable.exe"
+          Copy-Item "Output\4images1mot-${version}-setup.exe" "artifacts\"
+          Get-ChildItem artifacts
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-packages
-          path: |
-            dist/4images1mot-*-portable.exe
-            Output/4images1mot-*-setup.exe
+          path: artifacts/*.exe
 
   release:
     needs: [build-deb, build-rpm, build-appimage, build-windows]
