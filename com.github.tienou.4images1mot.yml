@@ -1,0 +1,43 @@
+# Flatpak manifest
+# Build: flatpak-builder --user --install --force-clean build-flatpak com.github.tienou.4images1mot.yml
+# Run:   flatpak run com.github.tienou.4images1mot
+app-id: com.github.tienou.4images1mot
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: 4images1mot
+
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+
+modules:
+  - name: python3-tkinter
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-index --prefix=/app .
+    sources: []
+
+  - name: 4images1mot
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/share/4images1mot
+      - cp main.py /app/share/4images1mot/
+      - cp puzzles.py /app/share/4images1mot/
+      - cp icon.svg /app/share/4images1mot/
+      - mkdir -p /app/bin
+      - |
+        cat > /app/bin/4images1mot << 'EOF'
+        #!/bin/bash
+        exec python3 /app/share/4images1mot/main.py "$@"
+        EOF
+      - chmod +x /app/bin/4images1mot
+      - mkdir -p /app/share/applications
+      - cp com.github.tienou.4images1mot.desktop /app/share/applications/
+      - mkdir -p /app/share/icons/hicolor/scalable/apps
+      - cp icon.svg /app/share/icons/hicolor/scalable/apps/com.github.tienou.4images1mot.svg
+    sources:
+      - type: dir
+        path: .

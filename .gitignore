@@ -1,0 +1,26 @@
+# Build artifacts
+AppDir/
+build/
+dist/
+rpmbuild/
+build-flatpak/
+.flatpak-builder/
+parts/
+prime/
+stage/
+snap/.snapcraft/
+
+# Packages générés
+*.AppImage
+*.deb
+*.rpm
+*.snap
+*.flatpak
+
+# Tools
+appimagetool
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

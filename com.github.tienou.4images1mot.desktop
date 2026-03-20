@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=4 Images 1 Mot
+Comment=Jeu de devinettes - Trouve le mot commun aux 4 images
+Exec=4images1mot
+Icon=com.github.tienou.4images1mot
+Type=Application
+Categories=Game;
+Terminal=false
+StartupWMClass=4images1mot
