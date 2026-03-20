@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
 4 Images 1 Mot - Jeu de devinettes
-Application desktop pour Linux (Ubuntu)
+Application desktop pour Linux et Windows
 Multilingue : fr, en, es, de, it, pt
 """
 
 import locale
 import os
+import sys
 import tkinter as tk
 from tkinter import font as tkfont
 import random
@@ -28,27 +29,75 @@ SUCCESS_COLOR = "#06D6A0"
 TEXT_COLOR = "#EAEAEA"
 TEXT_DARK = "#1A1A2E"
 CARD_SIZE = 170
-LETTER_BTN_SIZE = 48
-ANSWER_SLOT_SIZE = 44
+
+
+def _get_font_family():
+    """Retourne une police disponible sur le système."""
+    try:
+        root = tk._default_root
+        available = tkfont.families(root)
+        for candidate in ("Ubuntu", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial"):
+            if candidate in available:
+                return candidate
+    except Exception:
+        pass
+    return "TkDefaultFont"
+
+
+def _get_emoji_font():
+    """Retourne une police emoji disponible."""
+    try:
+        root = tk._default_root
+        available = tkfont.families(root)
+        for candidate in ("Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", "Symbola"):
+            if candidate in available:
+                return candidate
+    except Exception:
+        pass
+    return "TkDefaultFont"
+
+
+def _text_color_for_bg(hex_color):
+    """Retourne 'white' ou '#1A1A2E' selon la luminosité du fond."""
+    try:
+        c = hex_color.lstrip("#")
+        r, g, b = int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
+        luminance = 0.299 * r + 0.587 * g + 0.114 * b
+        return TEXT_DARK if luminance > 160 else "white"
+    except Exception:
+        return "white"
 
 
 def detect_language():
     """Détecte la langue du système."""
-    # Essayer LANG, LC_ALL, LANGUAGE (Linux)
+    # Linux: LANG, LC_ALL, LANGUAGE
     for var in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
         val = os.environ.get(var, "")
         if val:
             code = val.split("_")[0].split(".")[0].split(":")[0].lower()
             if code in LANGUAGES:
                 return code
-    # Fallback via locale
+    # Fallback via locale (compatible Python 3.11+)
     try:
-        loc = locale.getdefaultlocale()[0] or ""
+        loc = locale.getlocale()[0] or ""
         code = loc.split("_")[0].lower()
         if code in LANGUAGES:
             return code
     except Exception:
         pass
+    # Windows: kernel32 API
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage()
+            lang_code = {
+                0x040C: "fr", 0x0409: "en", 0x0C0A: "es",
+                0x0407: "de", 0x0410: "it", 0x0416: "pt",
+            }.get(lang_id & 0xFFFF)
+            if lang_code:
+                return lang_code
+        except Exception:
+            pass
     return "fr"
 
 
@@ -84,21 +133,24 @@ class ImageCard(tk.Canvas):
             highlightbackground="#B0B0B0",
             relief="flat",
         )
-        # Arrondir les coins visuellement
+        text_color = _text_color_for_bg(color)
+        emoji_font = _get_emoji_font()
+        ui_font = _get_font_family()
+
         self._round_rect(2, 2, size - 2, size - 2, 15, color)
         self.create_text(
             size // 2,
             size // 2 - 15,
             text=icon,
-            font=("Segoe UI Emoji", 42),
-            fill="white",
+            font=(emoji_font, 42),
+            fill=text_color,
         )
         self.create_text(
             size // 2,
             size - 30,
             text=desc,
-            font=("Ubuntu", 11, "bold"),
-            fill="white",
+            font=(ui_font, 11, "bold"),
+            fill=text_color,
             justify="center",
             width=size - 20,
         )
@@ -121,6 +173,9 @@ class Game(tk.Tk):
         # Langue auto-détectée
         self.lang = detect_language()
 
+        # Polices adaptées au système
+        ui_font = _get_font_family()
+
         self.title(f"🎮 {t(self.lang, 'title')}")
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.configure(bg=BG_COLOR)
@@ -132,19 +187,35 @@ class Game(tk.Tk):
         self.current_index = 0
         self.score = 0
         self.hints_used = 0
-        self.current_answer = []  # Lettres placées [(index_pool, lettre), ...]
+        self.current_answer = []
         self.pool_buttons = []
         self.answer_slots = []
+        self.locked = False  # Verrouille les interactions pendant les transitions
+        self._pending_after = None  # ID du timer en cours
 
         # Polices
-        self.font_title = tkfont.Font(family="Ubuntu", size=24, weight="bold")
-        self.font_score = tkfont.Font(family="Ubuntu", size=14)
-        self.font_letter = tkfont.Font(family="Ubuntu", size=18, weight="bold")
-        self.font_btn = tkfont.Font(family="Ubuntu", size=12, weight="bold")
-        self.font_small = tkfont.Font(family="Ubuntu", size=11)
+        self.font_title = tkfont.Font(family=ui_font, size=24, weight="bold")
+        self.font_score = tkfont.Font(family=ui_font, size=14)
+        self.font_letter = tkfont.Font(family=ui_font, size=18, weight="bold")
+        self.font_btn = tkfont.Font(family=ui_font, size=12, weight="bold")
+        self.font_small = tkfont.Font(family=ui_font, size=11)
 
         self._build_ui()
         self._load_puzzle()
+
+    def _schedule_next(self, delay, callback):
+        """Planifie un callback avec annulation de l'ancien."""
+        if self._pending_after is not None:
+            self.after_cancel(self._pending_after)
+        self._pending_after = self.after(delay, callback)
+
+    def _set_locked(self, locked):
+        """Verrouille ou déverrouille les interactions."""
+        self.locked = locked
+        state = "disabled" if locked else "normal"
+        self.btn_hint.config(state=state)
+        self.btn_skip.config(state=state)
+        self.btn_clear.config(state=state)
 
     def _build_ui(self):
         """Construit l'interface utilisateur."""
@@ -269,6 +340,10 @@ class Game(tk.Tk):
 
     def _change_language(self, new_lang):
         """Change la langue et recharge l'interface."""
+        if self._pending_after is not None:
+            self.after_cancel(self._pending_after)
+            self._pending_after = None
+        self.locked = False
         self.lang = new_lang
         self.title(f"🎮 {t(self.lang, 'title')}")
         self.btn_hint.config(text=f"💡 {t(self.lang, 'hint')}")
@@ -278,6 +353,9 @@ class Game(tk.Tk):
 
     def _load_puzzle(self):
         """Charge le puzzle courant."""
+        self._pending_after = None
+        self._set_locked(False)
+
         if self.current_index >= len(self.puzzles):
             self._show_end_screen()
             return
@@ -310,19 +388,24 @@ class Game(tk.Tk):
             w.destroy()
         self.answer_slots = []
 
+        # Adapter la taille de police pour les longs mots
+        letter_font = self.font_letter
+        if len(self.current_word) > 8:
+            letter_font = tkfont.Font(family=_get_font_family(), size=15, weight="bold")
+
         for i in range(len(self.current_word)):
             slot = tk.Label(
                 self.answer_frame,
                 text="",
                 width=3,
                 height=1,
-                font=self.font_letter,
+                font=letter_font,
                 bg=ACCENT_COLOR,
                 fg=TEXT_COLOR,
                 relief="flat",
                 cursor="hand2",
             )
-            slot.grid(row=0, column=i, padx=3, pady=5)
+            slot.grid(row=0, column=i, padx=2, pady=5)
             slot.bind("<Button-1>", lambda e, idx=i: self._remove_letter_at(idx))
             self.answer_slots.append(slot)
 
@@ -336,10 +419,8 @@ class Game(tk.Tk):
         self.pool_buttons = []
 
         word_letters = list(self.current_word)
-        # Ajouter des lettres aléatoires pour remplir à 14 lettres
         pool_size = max(14, len(word_letters) + 4)
         extra = pool_size - len(word_letters)
-        # Lettres fréquentes selon la langue
         freq_map = {
             "fr": "AEIOURSTNLCDPMG",
             "en": "ETAOINSRHLDCUMF",
@@ -356,7 +437,6 @@ class Game(tk.Tk):
         self.pool_letters = all_letters
         self.pool_used = [False] * len(all_letters)
 
-        # Afficher en 2 lignes
         cols = 7
         for i, letter in enumerate(all_letters):
             btn = tk.Button(
@@ -377,6 +457,8 @@ class Game(tk.Tk):
 
     def _place_letter(self, pool_idx):
         """Place une lettre du pool dans la réponse."""
+        if self.locked:
+            return
         if self.pool_used[pool_idx]:
             return
         if len(self.current_answer) >= len(self.current_word):
@@ -390,27 +472,25 @@ class Game(tk.Tk):
         self.current_answer.append((pool_idx, letter))
         self.answer_slots[pos].config(text=letter, bg="#3A5A9F")
 
-        # Vérifier si réponse complète
         if len(self.current_answer) == len(self.current_word):
             self._check_answer()
 
     def _remove_letter_at(self, slot_idx):
         """Retire une lettre à une position donnée."""
+        if self.locked:
+            return
         if slot_idx >= len(self.current_answer):
             return
 
         pool_idx, letter = self.current_answer[slot_idx]
 
-        # Remettre dans le pool
         self.pool_used[pool_idx] = False
         self.pool_buttons[pool_idx].config(
             bg="#2A4A7F", fg=TEXT_COLOR, state="normal"
         )
 
-        # Retirer de la réponse et décaler
         self.current_answer.pop(slot_idx)
 
-        # Reconstruire l'affichage des slots
         for i in range(len(self.current_word)):
             if i < len(self.current_answer):
                 self.answer_slots[i].config(
@@ -423,14 +503,17 @@ class Game(tk.Tk):
 
     def _remove_last_letter(self):
         """Retire la dernière lettre placée."""
+        if self.locked:
+            return
         if self.current_answer:
             self._remove_letter_at(len(self.current_answer) - 1)
 
     def _on_key_press(self, event):
         """Gère la saisie clavier."""
+        if self.locked:
+            return
         key = event.char.upper()
         if key and key in string.ascii_uppercase:
-            # Trouver la première lettre correspondante non utilisée dans le pool
             for i, letter in enumerate(self.pool_letters):
                 if letter == key and not self.pool_used[i]:
                     self._place_letter(i)
@@ -438,6 +521,8 @@ class Game(tk.Tk):
 
     def _clear_answer(self):
         """Efface toute la réponse."""
+        if self.locked:
+            return
         while self.current_answer:
             self._remove_letter_at(len(self.current_answer) - 1)
 
@@ -445,34 +530,30 @@ class Game(tk.Tk):
         """Vérifie si la réponse est correcte."""
         answer = "".join(letter for _, letter in self.current_answer)
         if answer == self.current_word:
-            # Succès !
-            points = max(50, 200 - self.hints_used * 50)
+            points = max(100, 200 - self.hints_used * 50)
             self.score += points
             self.lbl_score.config(text=f"⭐ {t(self.lang, 'score')}: {self.score}")
             self.lbl_feedback.config(
                 text=f"✅ {t(self.lang, 'bravo', pts=points)}", fg=SUCCESS_COLOR
             )
 
-            # Colorer les slots en vert
             for slot in self.answer_slots:
                 slot.config(bg=SUCCESS_COLOR, fg=TEXT_DARK)
 
-            # Passer au puzzle suivant après un délai
             self.hints_used = 0
             self.current_index += 1
-            self.after(1500, self._load_puzzle)
+            self._set_locked(True)
+            self._schedule_next(1500, self._load_puzzle)
         else:
             self.lbl_feedback.config(
                 text=f"❌ {t(self.lang, 'wrong')}", fg=HIGHLIGHT_COLOR
             )
-            # Secouer les slots (animation simple)
             self._shake_animation()
 
     def _shake_animation(self, count=0):
         """Animation de secousse en cas d'erreur."""
         if count >= 6:
-            self.answer_frame.place_forget()
-            self.answer_frame.pack(pady=10)
+            self.answer_frame.pack_configure(padx=0)
             return
         offset = 8 if count % 2 == 0 else -8
         self.answer_frame.pack_configure(padx=offset)
@@ -480,26 +561,32 @@ class Game(tk.Tk):
 
     def _use_hint(self):
         """Révèle une lettre correcte."""
+        if self.locked:
+            return
+        if self.current_index >= len(self.puzzles):
+            return
         placed = len(self.current_answer)
         if placed >= len(self.current_word):
             return
 
-        # Trouver la lettre nécessaire à la position suivante
         needed_letter = self.current_word[placed]
         self.hints_used += 1
-        self.score = max(0, self.score - 50)
-        self.lbl_score.config(text=f"⭐ {t(self.lang, 'score')}: {self.score}")
 
-        # Trouver cette lettre dans le pool
         for i, letter in enumerate(self.pool_letters):
             if letter == needed_letter and not self.pool_used[i]:
                 self._place_letter(i)
-                # Colorer en jaune pour montrer que c'est un indice
-                self.answer_slots[placed].config(bg="#E9C46A", fg=TEXT_DARK)
+                # Colorer en jaune seulement si on n'a pas changé de puzzle
+                if placed < len(self.answer_slots) and not self.locked:
+                    self.answer_slots[placed].config(bg="#E9C46A", fg=TEXT_DARK)
                 break
 
     def _skip_puzzle(self):
         """Passe au puzzle suivant."""
+        if self.locked:
+            return
+        if self.current_index >= len(self.puzzles):
+            return
+
         self.hints_used = 0
         puzzle = self.puzzles[self.current_index]
         word, _ = get_puzzle_for_lang(puzzle, self.lang)
@@ -509,7 +596,8 @@ class Game(tk.Tk):
             text=f"{t(self.lang, 'answer_was', word=word)}",
             fg="#FFD166",
         )
-        self.after(1500, self._load_puzzle)
+        self._set_locked(True)
+        self._schedule_next(1500, self._load_puzzle)
 
     def _show_end_screen(self):
         """Affiche l'écran de fin de jeu."""
@@ -521,20 +609,28 @@ class Game(tk.Tk):
             w.destroy()
         self.lbl_feedback.config(text="")
 
+        # Désactiver les boutons
+        self.btn_hint.config(state="disabled")
+        self.btn_skip.config(state="disabled")
+        self.btn_clear.config(state="disabled")
+
+        emoji_font = _get_emoji_font()
+        ui_font = _get_font_family()
+
         end_frame = tk.Frame(self.images_frame, bg=BG_COLOR)
         end_frame.pack(pady=40)
 
         tk.Label(
             end_frame,
             text="🎉",
-            font=("Segoe UI Emoji", 64),
+            font=(emoji_font, 64),
             bg=BG_COLOR,
         ).pack()
 
         tk.Label(
             end_frame,
             text=t(self.lang, "congrats"),
-            font=tkfont.Font(family="Ubuntu", size=32, weight="bold"),
+            font=tkfont.Font(family=ui_font, size=32, weight="bold"),
             bg=BG_COLOR,
             fg=SUCCESS_COLOR,
         ).pack(pady=10)
@@ -542,7 +638,7 @@ class Game(tk.Tk):
         tk.Label(
             end_frame,
             text=t(self.lang, "final_score", score=self.score),
-            font=tkfont.Font(family="Ubuntu", size=20),
+            font=tkfont.Font(family=ui_font, size=20),
             bg=BG_COLOR,
             fg="#FFD166",
         ).pack(pady=5)
@@ -576,6 +672,9 @@ class Game(tk.Tk):
         self.current_index = 0
         self.score = 0
         self.hints_used = 0
+        self.btn_hint.config(state="normal")
+        self.btn_skip.config(state="normal")
+        self.btn_clear.config(state="normal")
         self._load_puzzle()
 
 
