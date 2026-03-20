@@ -24,3 +24,5 @@ appimagetool
 __pycache__/
 *.pyc
 *.pyo
+mockup/
+.claude/
