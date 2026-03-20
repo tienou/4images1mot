@@ -65,8 +65,45 @@ jobs:
           name: appimage-package
           path: "*.AppImage"
 
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pillow pyinstaller
+
+      - name: Build portable .exe
+        run: pyinstaller 4images1mot.spec
+
+      - name: Build installer with Inno Setup
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          (Get-Content installer.iss) -replace '__VERSION__', $version | Set-Content installer.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Rename portable exe with version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          Copy-Item "dist\4images1mot.exe" "dist\4images1mot-${version}-portable.exe"
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-packages
+          path: |
+            dist/4images1mot-*-portable.exe
+            Output/4images1mot-*-setup.exe
+
   release:
-    needs: [build-deb, build-rpm, build-appimage]
+    needs: [build-deb, build-rpm, build-appimage, build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +115,7 @@ jobs:
           merge-multiple: true
 
       - name: List packages
-        run: ls -lh packages/
+        run: ls -lhR packages/
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
@@ -87,3 +124,4 @@ jobs:
             packages/*.deb
             packages/*.rpm
             packages/*.AppImage
+            packages/*.exe

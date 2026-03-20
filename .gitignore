@@ -17,6 +17,11 @@ snap/.snapcraft/
 *.snap
 *.flatpak
 
+# Windows build
+Output/
+*.exe
+*.spec.bak
+
 # Tools
 appimagetool
 

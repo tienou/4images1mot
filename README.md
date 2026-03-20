@@ -10,7 +10,7 @@
 
 ## 🇫🇷 Français
 
-Jeu de devinettes pour Linux — Trouve le mot commun aux 4 images !
+Jeu de devinettes pour Linux et Windows — Trouve le mot commun aux 4 images !
 
 ### Fonctionnalités
 
@@ -23,7 +23,7 @@ Jeu de devinettes pour Linux — Trouve le mot commun aux 4 images !
 
 ### 🌍 Langues supportées
 
-La langue est **détectée automatiquement** depuis le système (`LANG`, `LC_ALL`).
+La langue est **détectée automatiquement** depuis le système.
 Un sélecteur dans le header permet de changer manuellement.
 
 | Langue | Code |
@@ -37,7 +37,16 @@ Un sélecteur dans le header permet de changer manuellement.
 
 ### Installation
 
-#### Depuis les sources
+#### 🪟 Windows
+
+| Type | Fichier | Description |
+|------|---------|-------------|
+| **Installeur** | `4images1mot-x.x.x-setup.exe` | Installe le jeu, crée un raccourci bureau et menu Démarrer |
+| **Portable** | `4images1mot-x.x.x-portable.exe` | Fichier unique, aucune installation requise |
+
+Télécharger depuis la [page Releases](https://github.com/tienou/4images1mot/releases/latest).
+
+#### 🐧 Linux — Depuis les sources
 ```bash
 sudo apt install python3-tk
 git clone https://github.com/tienou/4images1mot.git
@@ -45,42 +54,41 @@ cd 4images1mot
 python3 main.py
 ```
 
-#### Paquet .deb (Debian/Ubuntu/Mint)
+#### 🐧 Linux — Paquets pré-compilés
 ```bash
+# .deb (Debian/Ubuntu/Mint)
 sudo dpkg -i 4images1mot_1.0.0_all.deb
-```
 
-#### Paquet .rpm (Fedora/RHEL/openSUSE)
-```bash
+# .rpm (Fedora/RHEL/openSUSE)
 sudo dnf install 4images1mot-1.0.0-1.noarch.rpm
-```
 
-#### AppImage (universel)
-```bash
+# AppImage (universel)
 chmod +x 4images1mot-1.0.0-x86_64.AppImage
 ./4images1mot-1.0.0-x86_64.AppImage
 ```
 
-### 📦 Packages disponibles
+### 📦 Tous les packages
 
-| Format | Commande | Distribution |
-|--------|----------|-------------|
-| **.deb** | `make deb` | Debian, Ubuntu, Mint |
-| **.rpm** | `make rpm` | Fedora, RHEL, openSUSE |
-| **AppImage** | `make appimage` | Toutes (portable) |
-| **Flatpak** | `make flatpak` | Toutes (sandboxé) |
-| **Snap** | `make snap` | Ubuntu, Manjaro |
-| **Tous** | `make all` | Build tout d'un coup |
+| Format | Plateforme | Distribution |
+|--------|-----------|-------------|
+| **Installeur .exe** | Windows | Windows 10/11 |
+| **Portable .exe** | Windows | Windows 10/11 (aucune installation) |
+| **.deb** | Linux | Debian, Ubuntu, Mint |
+| **.rpm** | Linux | Fedora, RHEL, openSUSE |
+| **AppImage** | Linux | Toutes (portable) |
+| **Flatpak** | Linux | Toutes (sandboxé) |
+| **Snap** | Linux | Ubuntu, Manjaro |
 
-#### Prérequis pour le build
+#### Build depuis les sources (Linux)
 
-| Package | Outil requis |
-|---------|-------------|
-| .deb | `dpkg-dev` |
-| .rpm | `rpm-build` |
-| AppImage | `wget` (télécharge appimagetool) |
-| Flatpak | `flatpak-builder` + runtime freedesktop 23.08 |
-| Snap | `snapcraft` |
+| Commande | Résultat |
+|----------|----------|
+| `make deb` | Paquet .deb |
+| `make rpm` | Paquet .rpm |
+| `make appimage` | AppImage |
+| `make flatpak` | Flatpak |
+| `make snap` | Snap |
+| `make all` | Tous les formats |
 
 ### 🎮 Contrôles
 
@@ -97,7 +105,7 @@ chmod +x 4images1mot-1.0.0-x86_64.AppImage
 
 ## 🇬🇧 English
 
-A word guessing game for Linux — Find the word that connects the 4 images!
+A word guessing game for Linux and Windows — Find the word that connects the 4 images!
 
 ### Features
 
@@ -110,7 +118,7 @@ A word guessing game for Linux — Find the word that connects the 4 images!
 
 ### 🌍 Supported languages
 
-The language is **auto-detected** from the system (`LANG`, `LC_ALL`).
+The language is **auto-detected** from the system.
 A selector in the header allows manual switching.
 
 | Language | Code |
@@ -124,7 +132,16 @@ A selector in the header allows manual switching.
 
 ### Installation
 
-#### From source
+#### 🪟 Windows
+
+| Type | File | Description |
+|------|------|-------------|
+| **Installer** | `4images1mot-x.x.x-setup.exe` | Installs the game, creates desktop and Start menu shortcuts |
+| **Portable** | `4images1mot-x.x.x-portable.exe` | Single file, no installation required |
+
+Download from the [Releases page](https://github.com/tienou/4images1mot/releases/latest).
+
+#### 🐧 Linux — From source
 ```bash
 sudo apt install python3-tk
 git clone https://github.com/tienou/4images1mot.git
@@ -132,42 +149,41 @@ cd 4images1mot
 python3 main.py
 ```
 
-#### .deb package (Debian/Ubuntu/Mint)
+#### 🐧 Linux — Pre-built packages
 ```bash
+# .deb (Debian/Ubuntu/Mint)
 sudo dpkg -i 4images1mot_1.0.0_all.deb
-```
 
-#### .rpm package (Fedora/RHEL/openSUSE)
-```bash
+# .rpm (Fedora/RHEL/openSUSE)
 sudo dnf install 4images1mot-1.0.0-1.noarch.rpm
-```
 
-#### AppImage (universal)
-```bash
+# AppImage (universal)
 chmod +x 4images1mot-1.0.0-x86_64.AppImage
 ./4images1mot-1.0.0-x86_64.AppImage
 ```
 
-### 📦 Available packages
+### 📦 All packages
 
-| Format | Command | Distribution |
-|--------|---------|-------------|
-| **.deb** | `make deb` | Debian, Ubuntu, Mint |
-| **.rpm** | `make rpm` | Fedora, RHEL, openSUSE |
-| **AppImage** | `make appimage` | All (portable) |
-| **Flatpak** | `make flatpak` | All (sandboxed) |
-| **Snap** | `make snap` | Ubuntu, Manjaro |
-| **All** | `make all` | Build everything |
+| Format | Platform | Distribution |
+|--------|----------|-------------|
+| **Installer .exe** | Windows | Windows 10/11 |
+| **Portable .exe** | Windows | Windows 10/11 (no installation) |
+| **.deb** | Linux | Debian, Ubuntu, Mint |
+| **.rpm** | Linux | Fedora, RHEL, openSUSE |
+| **AppImage** | Linux | All (portable) |
+| **Flatpak** | Linux | All (sandboxed) |
+| **Snap** | Linux | Ubuntu, Manjaro |
 
-#### Build prerequisites
+#### Build from source (Linux)
 
-| Package | Required tool |
-|---------|--------------|
-| .deb | `dpkg-dev` |
-| .rpm | `rpm-build` |
-| AppImage | `wget` (downloads appimagetool) |
-| Flatpak | `flatpak-builder` + freedesktop 23.08 runtime |
-| Snap | `snapcraft` |
+| Command | Output |
+|---------|--------|
+| `make deb` | .deb package |
+| `make rpm` | .rpm package |
+| `make appimage` | AppImage |
+| `make flatpak` | Flatpak |
+| `make snap` | Snap |
+| `make all` | All formats |
 
 ### 🎮 Controls
 
