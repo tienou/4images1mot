@@ -81,7 +81,7 @@ class ImageCard(tk.Canvas):
             height=size,
             bg=color,
             highlightthickness=2,
-            highlightbackground="#FFFFFF30",
+            highlightbackground="#B0B0B0",
             relief="flat",
         )
         # Arrondir les coins visuellement
