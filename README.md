@@ -6,13 +6,26 @@ Jeu de devinettes pour Linux — Trouve le mot commun aux 4 images !
 
 ## Fonctionnalités
 
-- 🖼️ **30 puzzles** en français avec 3 niveaux de difficulté
+- 🖼️ **30 puzzles** avec 3 niveaux de difficulté
 - ⌨️ Sélection de lettres par **clic ou clavier**
 - ⭐ Système de **score** (+200pts par mot, -50pts par indice)
 - 💡 **Indices** pour révéler une lettre
 - ⏭️ Possibilité de **passer** un puzzle
 - 🎨 Interface sombre moderne
-- 🌍 **Multilingue** : Français, English, Español, Deutsch, Italiano, Português
+
+## 🌍 Langues supportées
+
+La langue est **détectée automatiquement** depuis le système (`LANG`, `LC_ALL`).
+Un sélecteur dans le header permet de changer manuellement.
+
+| Langue | Code |
+|--------|------|
+| 🇫🇷 Français | `fr` |
+| 🇬🇧 English | `en` |
+| 🇪🇸 Español | `es` |
+| 🇩🇪 Deutsch | `de` |
+| 🇮🇹 Italiano | `it` |
+| 🇧🇷 Português | `pt` |
 
 ## Installation
 
@@ -41,7 +54,7 @@ chmod +x 4images1mot-1.0.0-x86_64.AppImage
 ./4images1mot-1.0.0-x86_64.AppImage
 ```
 
-## Packages disponibles
+## 📦 Packages disponibles
 
 | Format | Commande | Distribution |
 |--------|----------|-------------|
@@ -52,7 +65,7 @@ chmod +x 4images1mot-1.0.0-x86_64.AppImage
 | **Snap** | `make snap` | Ubuntu, Manjaro |
 | **Tous** | `make all` | Build tout d'un coup |
 
-## Prérequis pour le build
+### Prérequis pour le build
 
 | Package | Outil requis |
 |---------|-------------|
@@ -62,7 +75,7 @@ chmod +x 4images1mot-1.0.0-x86_64.AppImage
 | Flatpak | `flatpak-builder` + runtime freedesktop 23.08 |
 | Snap | `snapcraft` |
 
-## Contrôles
+## 🎮 Contrôles
 
 | Action | Contrôle |
 |--------|----------|
