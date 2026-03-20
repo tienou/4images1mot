@@ -21,7 +21,6 @@ exe = EXE(
     a.scripts,
     a.binaries,
     a.datas,
-    a.zips,
     name='4images1mot',
     debug=False,
     bootloader_ignore_signals=False,
