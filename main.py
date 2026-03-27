@@ -295,7 +295,7 @@ class Game(tk.Tk):
 
         self.btn_hint = tk.Button(
             actions,
-            text=f"💡 {t(self.lang, 'hint')}",
+            text=t(self.lang, 'hint'),
             font=self.font_btn,
             bg="#E9C46A",
             fg=TEXT_DARK,
@@ -310,7 +310,7 @@ class Game(tk.Tk):
 
         self.btn_skip = tk.Button(
             actions,
-            text=f"⏭️ {t(self.lang, 'skip')}",
+            text=t(self.lang, 'skip'),
             font=self.font_btn,
             bg=ACCENT_COLOR,
             fg=TEXT_COLOR,
@@ -325,7 +325,7 @@ class Game(tk.Tk):
 
         self.btn_clear = tk.Button(
             actions,
-            text=f"🗑️ {t(self.lang, 'clear')}",
+            text=t(self.lang, 'clear'),
             font=self.font_btn,
             bg="#6C757D",
             fg=TEXT_COLOR,
@@ -350,9 +350,9 @@ class Game(tk.Tk):
         self.locked = False
         self.lang = new_lang
         self.title(f"🎮 {t(self.lang, 'title')}")
-        self.btn_hint.config(text=f"💡 {t(self.lang, 'hint')}")
-        self.btn_skip.config(text=f"⏭️ {t(self.lang, 'skip')}")
-        self.btn_clear.config(text=f"🗑️ {t(self.lang, 'clear')}")
+        self.btn_hint.config(text=t(self.lang, 'hint'))
+        self.btn_skip.config(text=t(self.lang, 'skip'))
+        self.btn_clear.config(text=t(self.lang, 'clear'))
         self._load_puzzle()
 
     def _load_puzzle(self):
