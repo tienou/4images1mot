@@ -281,13 +281,13 @@ class Game(tk.Tk):
         )
         self.lbl_feedback.pack(pady=5)
 
+        # --- Boutons d'action ---
+        actions = tk.Frame(self, bg=BG_COLOR)
+        actions.pack(pady=10)
+
         # --- Pool de lettres ---
         self.pool_frame = tk.Frame(self, bg=BG_COLOR)
         self.pool_frame.pack(pady=10)
-
-        # --- Boutons d'action ---
-        actions = tk.Frame(self, bg=BG_COLOR)
-        actions.pack(pady=15)
 
         self.btn_hint = tk.Button(
             actions,
