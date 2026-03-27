@@ -19,8 +19,8 @@ from puzzles_i18n import TRANSLATIONS
 from i18n import t, LANGUAGES
 
 # --- Constantes ---
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 820
+WINDOW_WIDTH = 750
+WINDOW_HEIGHT = 700
 BG_COLOR = "#1A1A2E"
 BG_SECONDARY = "#16213E"
 ACCENT_COLOR = "#0F3460"
@@ -28,7 +28,7 @@ HIGHLIGHT_COLOR = "#E94560"
 SUCCESS_COLOR = "#06D6A0"
 TEXT_COLOR = "#EAEAEA"
 TEXT_DARK = "#1A1A2E"
-CARD_SIZE = 170
+CARD_SIZE = 140
 
 
 def _get_font_family():
@@ -140,16 +140,16 @@ class ImageCard(tk.Canvas):
         self._round_rect(2, 2, size - 2, size - 2, 15, color)
         self.create_text(
             size // 2,
-            size // 2 - 15,
+            size // 2 - 20,
             text=icon,
-            font=(emoji_font, 42),
+            font=(emoji_font, 36),
             fill=text_color,
         )
         self.create_text(
             size // 2,
-            size - 30,
+            size - 25,
             text=desc,
-            font=(ui_font, 11, "bold"),
+            font=(ui_font, 10, "bold"),
             fill=text_color,
             justify="center",
             width=size - 20,
@@ -177,9 +177,13 @@ class Game(tk.Tk):
         ui_font = _get_font_family()
 
         self.title(f"🎮 {t(self.lang, 'title')}")
-        self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.configure(bg=BG_COLOR)
         self.resizable(False, False)
+        # Adapter la hauteur à l'écran disponible
+        self.update_idletasks()
+        screen_h = self.winfo_screenheight()
+        win_h = min(WINDOW_HEIGHT, screen_h - 100)
+        self.geometry(f"{WINDOW_WIDTH}x{win_h}")
 
         # État du jeu
         self.puzzles = list(PUZZLES)
@@ -220,7 +224,7 @@ class Game(tk.Tk):
     def _build_ui(self):
         """Construit l'interface utilisateur."""
         # --- Header ---
-        header = tk.Frame(self, bg=BG_SECONDARY, height=60)
+        header = tk.Frame(self, bg=BG_SECONDARY, height=50)
         header.pack(fill="x")
         header.pack_propagate(False)
 
@@ -269,25 +273,25 @@ class Game(tk.Tk):
 
         # --- Zone images ---
         self.images_frame = tk.Frame(self, bg=BG_COLOR)
-        self.images_frame.pack(pady=20)
+        self.images_frame.pack(pady=10)
 
         # --- Zone réponse ---
         self.answer_frame = tk.Frame(self, bg=BG_COLOR)
-        self.answer_frame.pack(pady=10)
+        self.answer_frame.pack(pady=5)
 
         # --- Message feedback ---
         self.lbl_feedback = tk.Label(
             self, text="", font=self.font_btn, bg=BG_COLOR, fg=SUCCESS_COLOR
         )
-        self.lbl_feedback.pack(pady=5)
+        self.lbl_feedback.pack(pady=2)
 
         # --- Boutons d'action ---
         actions = tk.Frame(self, bg=BG_COLOR)
-        actions.pack(pady=10)
+        actions.pack(pady=5)
 
         # --- Pool de lettres ---
         self.pool_frame = tk.Frame(self, bg=BG_COLOR)
-        self.pool_frame.pack(pady=10)
+        self.pool_frame.pack(pady=5)
 
         self.btn_hint = tk.Button(
             actions,
@@ -381,7 +385,7 @@ class Game(tk.Tk):
             card = ImageCard(
                 self.images_frame, desc, img["color"], img["icon"]
             )
-            card.grid(row=i // 2, column=i % 2, padx=8, pady=8)
+            card.grid(row=i // 2, column=i % 2, padx=6, pady=6)
 
         # --- Slots réponse ---
         for w in self.answer_frame.winfo_children():
