@@ -20,7 +20,7 @@ mkdir -p "${TOPDIR}"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 # --- Créer l'archive source ---
 SRCDIR="${APP_NAME}-${VERSION}"
 mkdir -p "${SRCDIR}"
-cp main.py puzzles.py icon.svg 4images1mot.desktop "${SRCDIR}/"
+cp main.py puzzles.py puzzles_i18n.py i18n.py icon.svg 4images1mot.desktop "${SRCDIR}/"
 tar czf "${TOPDIR}/SOURCES/${APP_NAME}-${VERSION}.tar.gz" "${SRCDIR}"
 rm -rf "${SRCDIR}"
 
@@ -53,6 +53,8 @@ mkdir -p %{buildroot}/%{_datadir}/icons/hicolor/scalable/apps
 
 install -m 644 main.py %{buildroot}/opt/%{name}/
 install -m 644 puzzles.py %{buildroot}/opt/%{name}/
+install -m 644 puzzles_i18n.py %{buildroot}/opt/%{name}/
+install -m 644 i18n.py %{buildroot}/opt/%{name}/
 install -m 644 icon.svg %{buildroot}/opt/%{name}/
 
 # Lanceur

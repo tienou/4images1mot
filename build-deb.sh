@@ -57,6 +57,8 @@ chmod 755 "${PKG_DIR}/DEBIAN/postrm"
 # --- Copier les fichiers ---
 cp main.py "${PKG_DIR}/opt/${APP_NAME}/"
 cp puzzles.py "${PKG_DIR}/opt/${APP_NAME}/"
+cp puzzles_i18n.py "${PKG_DIR}/opt/${APP_NAME}/"
+cp i18n.py "${PKG_DIR}/opt/${APP_NAME}/"
 cp icon.svg "${PKG_DIR}/opt/${APP_NAME}/"
 
 # --- Lanceur ---

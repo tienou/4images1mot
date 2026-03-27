@@ -26,6 +26,8 @@ mkdir -p AppDir/usr/share/${APP_NAME}
 echo "📦 Copie des fichiers..."
 cp main.py AppDir/usr/share/${APP_NAME}/
 cp puzzles.py AppDir/usr/share/${APP_NAME}/
+cp puzzles_i18n.py AppDir/usr/share/${APP_NAME}/
+cp i18n.py AppDir/usr/share/${APP_NAME}/
 cp icon.svg AppDir/usr/share/icons/hicolor/scalable/apps/${APP_NAME}.svg
 cp ${APP_NAME}.desktop AppDir/usr/share/applications/
 cp ${APP_NAME}.desktop AppDir/
