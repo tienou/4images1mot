@@ -213,13 +213,35 @@ class Game(tk.Tk):
             self.after_cancel(self._pending_after)
         self._pending_after = self.after(delay, callback)
 
+    def _make_action_btn(self, parent, text, bg, fg, active_bg, command):
+        """Crée un bouton Label (compatible tous OS, y compris Linux/GTK)."""
+        lbl = tk.Label(
+            parent, text=text, font=self.font_btn,
+            bg=bg, fg=fg, padx=15, pady=8, cursor="hand2",
+        )
+        lbl._cmd = command
+        lbl._bg = bg
+        lbl._fg = fg
+        lbl._active_bg = active_bg
+        lbl._enabled = True
+        lbl.bind("<Enter>", lambda e: lbl.config(bg=active_bg) if lbl._enabled else None)
+        lbl.bind("<Leave>", lambda e: lbl.config(bg=lbl._bg) if lbl._enabled else None)
+        lbl.bind("<Button-1>", lambda e: lbl._cmd() if lbl._enabled else None)
+        return lbl
+
+    def _set_btn_enabled(self, btn, enabled):
+        """Active/désactive un bouton-label."""
+        btn._enabled = enabled
+        if enabled:
+            btn.config(fg=btn._fg, cursor="hand2")
+        else:
+            btn.config(fg="#666666", cursor="arrow")
+
     def _set_locked(self, locked):
         """Verrouille ou déverrouille les interactions."""
         self.locked = locked
-        state = "disabled" if locked else "normal"
-        self.btn_hint.config(state=state)
-        self.btn_skip.config(state=state)
-        self.btn_clear.config(state=state)
+        for btn in (self.btn_hint, self.btn_skip, self.btn_clear):
+            self._set_btn_enabled(btn, not locked)
 
     def _build_ui(self):
         """Construit l'interface utilisateur."""
@@ -293,48 +315,21 @@ class Game(tk.Tk):
         self.pool_frame = tk.Frame(self, bg=BG_COLOR)
         self.pool_frame.pack(pady=5)
 
-        self.btn_hint = tk.Button(
-            actions,
-            text=t(self.lang, 'hint'),
-            font=self.font_btn,
-            bg="#E9C46A",
-            fg=TEXT_DARK,
-            activebackground="#F4A261",
-            relief="flat",
-            padx=15,
-            pady=8,
-            cursor="hand2",
-            command=self._use_hint,
+        self.btn_hint = self._make_action_btn(
+            actions, t(self.lang, 'hint'),
+            "#E9C46A", TEXT_DARK, "#F4A261", self._use_hint,
         )
         self.btn_hint.pack(side="left", padx=10)
 
-        self.btn_skip = tk.Button(
-            actions,
-            text=t(self.lang, 'skip'),
-            font=self.font_btn,
-            bg=ACCENT_COLOR,
-            fg=TEXT_COLOR,
-            activebackground="#1A4080",
-            relief="flat",
-            padx=15,
-            pady=8,
-            cursor="hand2",
-            command=self._skip_puzzle,
+        self.btn_skip = self._make_action_btn(
+            actions, t(self.lang, 'skip'),
+            ACCENT_COLOR, TEXT_COLOR, "#1A4080", self._skip_puzzle,
         )
         self.btn_skip.pack(side="left", padx=10)
 
-        self.btn_clear = tk.Button(
-            actions,
-            text=t(self.lang, 'clear'),
-            font=self.font_btn,
-            bg="#6C757D",
-            fg=TEXT_COLOR,
-            activebackground="#495057",
-            relief="flat",
-            padx=15,
-            pady=8,
-            cursor="hand2",
-            command=self._clear_answer,
+        self.btn_clear = self._make_action_btn(
+            actions, t(self.lang, 'clear'),
+            "#6C757D", TEXT_COLOR, "#495057", self._clear_answer,
         )
         self.btn_clear.pack(side="left", padx=10)
 
@@ -614,9 +609,8 @@ class Game(tk.Tk):
         self.lbl_feedback.config(text="")
 
         # Désactiver les boutons
-        self.btn_hint.config(state="disabled")
-        self.btn_skip.config(state="disabled")
-        self.btn_clear.config(state="disabled")
+        for btn in (self.btn_hint, self.btn_skip, self.btn_clear):
+            self._set_btn_enabled(btn, False)
 
         emoji_font = _get_emoji_font()
         ui_font = _get_font_family()
@@ -676,9 +670,8 @@ class Game(tk.Tk):
         self.current_index = 0
         self.score = 0
         self.hints_used = 0
-        self.btn_hint.config(state="normal")
-        self.btn_skip.config(state="normal")
-        self.btn_clear.config(state="normal")
+        for btn in (self.btn_hint, self.btn_skip, self.btn_clear):
+            self._set_btn_enabled(btn, True)
         self._load_puzzle()
 
 
