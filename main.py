@@ -186,8 +186,8 @@ class Game(tk.Tk):
         self.geometry(f"{WINDOW_WIDTH}x{win_h}")
 
         # État du jeu
-        self.puzzles = list(PUZZLES)
-        random.shuffle(self.puzzles)
+        self.all_puzzles = list(PUZZLES)
+        self.puzzles = []
         self.current_index = 0
         self.score = 0
         self.hints_used = 0
@@ -205,7 +205,7 @@ class Game(tk.Tk):
         self.font_small = tkfont.Font(family=ui_font, size=11)
 
         self._build_ui()
-        self._load_puzzle()
+        self._show_difficulty_screen()
 
     def _schedule_next(self, delay, callback):
         """Planifie un callback avec annulation de l'ancien."""
@@ -348,6 +348,83 @@ class Game(tk.Tk):
         self.btn_hint.config(text=t(self.lang, 'hint'))
         self.btn_skip.config(text=t(self.lang, 'skip'))
         self.btn_clear.config(text=t(self.lang, 'clear'))
+        self._load_puzzle()
+
+    def _show_difficulty_screen(self):
+        """Affiche l'écran de sélection de difficulté."""
+        if self._pending_after is not None:
+            self.after_cancel(self._pending_after)
+            self._pending_after = None
+        self.locked = True
+
+        # Nettoyer les zones de jeu
+        for w in self.images_frame.winfo_children():
+            w.destroy()
+        for w in self.answer_frame.winfo_children():
+            w.destroy()
+        for w in self.pool_frame.winfo_children():
+            w.destroy()
+        self.lbl_feedback.config(text="")
+
+        # Masquer les boutons d'action
+        for btn in (self.btn_hint, self.btn_skip, self.btn_clear):
+            self._set_btn_enabled(btn, False)
+
+        # Mettre à jour le header
+        self.lbl_level.config(text="")
+        self.lbl_score.config(text=f"⭐ {t(self.lang, 'score')}: 0")
+
+        emoji_font = _get_emoji_font()
+        ui_font = _get_font_family()
+
+        menu_frame = tk.Frame(self.images_frame, bg=BG_COLOR)
+        menu_frame.pack(pady=30)
+
+        tk.Label(
+            menu_frame,
+            text=t(self.lang, "choose_difficulty"),
+            font=tkfont.Font(family=ui_font, size=24, weight="bold"),
+            bg=BG_COLOR,
+            fg=TEXT_COLOR,
+        ).pack(pady=(0, 25))
+
+        # Compter les puzzles par difficulté
+        counts = {1: 0, 2: 0, 3: 0}
+        for p in self.all_puzzles:
+            counts[p["difficulty"]] = counts.get(p["difficulty"], 0) + 1
+        total = len(self.all_puzzles)
+
+        difficulties = [
+            (1, "diff_easy", "🟢", "#06D6A0", "#05B88A"),
+            (2, "diff_medium", "🟡", "#E9C46A", "#D4A843"),
+            (3, "diff_hard", "🔴", "#E94560", "#D13A52"),
+            (None, "diff_all", "🎮", ACCENT_COLOR, "#1A4080"),
+        ]
+
+        for diff, key, icon, bg, hover_bg in difficulties:
+            count = counts.get(diff, total) if diff else total
+            text = f"{icon}  {t(self.lang, key)}  ({t(self.lang, 'puzzles_count', count=count)})"
+            btn = self._make_action_btn(
+                menu_frame, text, bg,
+                _text_color_for_bg(bg), hover_bg,
+                lambda d=diff: self._start_game(d),
+            )
+            btn.config(font=tkfont.Font(family=ui_font, size=16, weight="bold"), padx=30, pady=12, width=30)
+            btn.pack(pady=8)
+
+    def _start_game(self, difficulty):
+        """Démarre le jeu avec la difficulté choisie."""
+        if difficulty is None:
+            self.puzzles = list(self.all_puzzles)
+        else:
+            self.puzzles = [p for p in self.all_puzzles if p["difficulty"] == difficulty]
+        random.shuffle(self.puzzles)
+        self.current_index = 0
+        self.score = 0
+        self.hints_used = 0
+        for btn in (self.btn_hint, self.btn_skip, self.btn_clear):
+            self._set_btn_enabled(btn, True)
+        self.locked = False
         self._load_puzzle()
 
     def _load_puzzle(self):
@@ -665,14 +742,8 @@ class Game(tk.Tk):
         ).pack(pady=20)
 
     def _restart_game(self):
-        """Relance le jeu depuis le début."""
-        random.shuffle(self.puzzles)
-        self.current_index = 0
-        self.score = 0
-        self.hints_used = 0
-        for btn in (self.btn_hint, self.btn_skip, self.btn_clear):
-            self._set_btn_enabled(btn, True)
-        self._load_puzzle()
+        """Retourne à l'écran de sélection de difficulté."""
+        self._show_difficulty_screen()
 
 
 if __name__ == "__main__":
