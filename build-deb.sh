@@ -7,7 +7,7 @@
 set -e
 
 APP_NAME="4images1mot"
-VERSION="1.0.0"
+VERSION="1.4.0"
 ARCH="all"  # Python = architecture indépendante
 PKG_DIR="${APP_NAME}_${VERSION}_${ARCH}"
 
@@ -35,7 +35,7 @@ Maintainer: tienou <tienou@github.com>
 Description: 4 Images 1 Mot - Jeu de devinettes
  Trouve le mot commun aux 4 images !
  Un jeu de réflexion amusant inspiré du célèbre jeu mobile.
- 30 niveaux de difficulté croissante, système de score et indices.
+ 104 puzzles avec 3 niveaux de difficulté, système de score et indices.
 Homepage: https://github.com/tienou/4images1mot
 EOF
 
